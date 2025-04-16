@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "shelfctrl",
-    "slug": "shelfctrl",
+    "name": "shelf",
+    "slug": "shelf",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
