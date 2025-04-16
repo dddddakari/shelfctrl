@@ -23,11 +23,10 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#7E8D85', // Secondary color
           borderTopWidth: 0,
-          height: 60,
+          height: 75,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          marginBottom: 5,
         },
       }}
     >
