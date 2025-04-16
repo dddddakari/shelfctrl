@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button, TextInput, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAppContext } from './context/AppContext'; // Adjust path accordingly
+import { Button, TextInput, View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useAppContext } from './context/AppContext';
 import { Link } from 'expo-router';
 
 const LoginPage = () => {
@@ -10,14 +10,13 @@ const LoginPage = () => {
 
   const handleLogin = () => {
     if (username && password) {
-      setIsLoggedIn(true); // Set login state to true
-      // Navigate to the home screen or wherever you need to go
+      setIsLoggedIn(true);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Login</Text>
+      <Image source={require('../components/ShelfCtrl_Logo.png')} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -33,7 +32,9 @@ const LoginPage = () => {
       />
       <Button title="Login" onPress={handleLogin} />
       <TouchableOpacity style={styles.signUpLink}>
-        <Text>Don't have an account? <Link style={styles.linkText} href={'/signup'}>Sign Up</Link></Text>
+        <Text>
+          Don't have an account? <Link style={styles.linkText} href="/signup">Sign Up</Link>
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -44,7 +45,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#4d5d51',
+  },
+  logo: {
+    width: 240,
+    height: 166,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   header: {
     fontSize: 24,
