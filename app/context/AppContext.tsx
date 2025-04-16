@@ -37,10 +37,14 @@ type Profile = {
   spotlightItems: string[];
 };
 
+type UserCredentials = {
+  username: string;
+  password: string;
+};
+
 type AppContextType = {
   profile: Profile;
   collections: Collection[];
-  items: Item[];
   tags: Tag[];
   isLoggedIn: boolean;
   updateProfile: (newProfile: Partial<Profile>) => void;
@@ -58,35 +62,29 @@ type AppContextType = {
   updateCollectionTag: (collectionId: string, tagId: string, updates: Partial<Tag>) => void;
   removeTagFromCollection: (collectionId: string, tagId: string) => void;
   addItemToCollection: (collectionId: string, item: Item) => void;
+  login: (credentials: UserCredentials) => boolean;
   logout: () => void;
-  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-
-  addTag: (tag: Omit<Tag, 'id'>) => void;
-  removeTag: (tagId: string) => void;
-
-  updateItemTags: (itemId: string, tagUpdates: Tag[]) => void;
+  register: (credentials: UserCredentials & { email: string }) => boolean;
+  getItems: () => Item[];
 };
 
 const AppContext = createContext<AppContextType>({} as AppContextType);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile>({
-    name: 'Bruno Bucciaratti',
-    username: 'Arrivederci',
-    bio: 'This taste … is the taste of a liar! Giorno Giovanna!',
+    name: '',
+    username: '',
+    bio: '',
     avatar: undefined,
-    spotlightItems: ['1'],
+    spotlightItems: [],
   });
 
   const [collections, setCollections] = useState<Collection[]>([
     {
-      id: '1',
-      title: 'Vinyl Records',
-      description: 'My precious vinyl collection',
-      tags: [
-        { id: '1', name: 'Music', color: '#A2E3C4' },
-        { id: '2', name: 'Vintage', color: '#F4A261' },
-      ],
+      id: 'default',
+      title: 'My Collection',
+      description: 'Default collection',
+      tags: [],
       items: [],
       createdAt: new Date(),
     },
@@ -96,11 +94,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     { id: '1', name: 'Favorite', color: '#A2E3C4' },
     { id: '2', name: 'Rare', color: '#F4A261' },
     { id: '3', name: 'Signed', color: '#E76F51' },
-    { id: '4', name: 'Limited', color: '#2A9D8F' },
-    { id: '5', name: 'First Edition', color: '#264653' },
   ]);
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [users, setUsers] = useState<{username: string, password: string, email: string}[]>([]);
+
+  const getItems = () => collections.flatMap(collection => collection.items);
+
+  const login = ({ username, password }: UserCredentials) => {
+    const userExists = users.some(
+      user => user.username === username && user.password === password
+    );
+    
+    if (userExists) {
+      setIsLoggedIn(true);
+      setProfile(prev => ({
+        ...prev,
+        username,
+        name: username,
+      }));
+      return true;
+    }
+    return false;
+  };
+
+  const register = ({ username, password, email }: UserCredentials & { email: string }) => {
+    const usernameTaken = users.some(user => user.username === username);
+    if (usernameTaken) return false;
+
+    setUsers(prev => [...prev, { username, password, email }]);
+    setIsLoggedIn(true);
+    setProfile(prev => ({
+      ...prev,
+      username,
+      name: username,
+    }));
+    return true;
+  };
 
   const updateProfile = (newProfile: Partial<Profile>) => {
     setProfile(prev => ({ ...prev, ...newProfile }));
@@ -156,16 +186,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }) => {
     const newItem: Item = {
       id: Date.now().toString(),
+      name: title,
       title,
       description,
       tags,
       image,
       customField,
       createdAt: new Date(),
-      name: ''
     };
 
-    // Add to all collections for now (we'll implement collection-specific adding later)
+    // Add to all collections
     setCollections(prev =>
       prev.map(collection => ({
         ...collection,
@@ -232,53 +262,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       avatar: undefined,
       spotlightItems: [],
     });
-    setCollections([]);
-    setTags([]);
+    setCollections([{
+      id: 'default',
+      title: 'My Collection',
+      description: 'Default collection',
+      tags: [],
+      items: [],
+      createdAt: new Date(),
+    }]);
+    setTags([
+      { id: '1', name: 'Favorite', color: '#A2E3C4' },
+      { id: '2', name: 'Rare', color: '#F4A261' },
+      { id: '3', name: 'Signed', color: '#E76F51' },
+    ]);
   };
-  const addTag = (tag: Omit<Tag, 'id'>) => {
-    const newTag = { ...tag, id: Date.now().toString() };
-    setTags(prev => [...prev, newTag]);
-    return newTag;
-  };
-  
-  const removeTag = (tagId: string) => {
-    setTags(prev => prev.filter(tag => tag.id !== tagId));
-
-    setCollections(prev => 
-      prev.map(collection => ({
-        ...collection,
-        items: collection.items.map(item => ({
-          ...item,
-          tags: item.tags.filter(tag => tag.id !== tagId)
-        })),
-        tags: collection.tags.filter(tag => tag.id !== tagId)
-      }))
-    );
-  };
-  
-  const updateItemTags = (itemId: string, tagUpdates: Tag[]) => {
-    setCollections(prev =>
-      prev.map(collection => ({
-        ...collection,
-        items: collection.items.map(item =>
-          item.id === itemId ? { ...item, tags: tagUpdates } : item
-        )
-      }))
-    );
-  };
-
-  const allItems = collections.flatMap(c => c.items);
 
   return (
     <AppContext.Provider
       value={{
         profile,
         collections,
-        items: allItems,
         tags,
-        addTag,
-        removeTag,
-        updateItemTags,
         isLoggedIn,
         updateProfile,
         addCollection,
@@ -289,8 +293,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateCollectionTag,
         removeTagFromCollection,
         addItemToCollection,
+        login,
         logout,
-        setIsLoggedIn,
+        register,
+        getItems,
       }}
     >
       {children}

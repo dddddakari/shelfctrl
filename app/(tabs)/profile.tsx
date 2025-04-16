@@ -24,7 +24,7 @@ export default function ProfileScreen() {
         <Button 
           mode="contained" 
           style={styles.editButton}
-          onPress={() => router.push('../components/manage-profile')}
+          onPress={() => router.push('../componenets/manage-profile')}
         >
           Edit Profile
         </Button>

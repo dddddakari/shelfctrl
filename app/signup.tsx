@@ -1,27 +1,36 @@
+// app/signup.tsx
 import React, { useState } from 'react';
 import { Button, TextInput, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppContext } from './context/AppContext';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 const SignUpPage = () => {
-  const { setIsLoggedIn } = useAppContext();
+  const { register } = useAppContext();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleSignUp = () => {
     if (!username || !email || !password || !confirmPassword) {
       setError('All fields are required');
       return;
     }
+    
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    setError('');
-    setIsLoggedIn(true);
+
+    const success = register({ username, password, email });
+    
+    if (success) {
+      router.push('/profile');
+    } else {
+      setError('Username already taken');
+    }
   };
 
   return (

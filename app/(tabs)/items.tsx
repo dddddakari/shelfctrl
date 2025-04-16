@@ -6,7 +6,14 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ItemsScreen() {
-  const { items, tags, addItem, profile, updateProfile } = useAppContext();
+  const { 
+    getItems, 
+    tags, 
+    addItem, 
+    profile, 
+    updateProfile,
+    collections 
+  } = useAppContext();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -16,10 +23,14 @@ export default function ItemsScreen() {
   const [image, setImage] = useState('');
   const [customField, setCustomField] = useState('');
 
+  const items = getItems();
+  
   const filteredItems = items.filter(item =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.tags.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    (item.tags && item.tags.some(tag => 
+      tag.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ))
   );
 
   const toggleSpotlight = (itemId: string) => {
@@ -27,7 +38,6 @@ export default function ItemsScreen() {
     const newSpotlightItems = isSpotlighted
       ? profile.spotlightItems.filter(id => id !== itemId)
       : [...profile.spotlightItems, itemId];
-
     updateProfile({ spotlightItems: newSpotlightItems });
   };
 
@@ -76,11 +86,9 @@ export default function ItemsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.headerText}>
-          My Items
-        </Text>
-      </View>
+      <Text variant="headlineMedium" style={styles.header}>
+        {collections.length > 0 ? collections[0].title : 'My Items'}
+      </Text>
 
       <Searchbar
         placeholder="Search items..."
@@ -118,7 +126,11 @@ export default function ItemsScreen() {
           </Button>
 
           {image && (
-            <Image source={{ uri: image }} style={styles.imagePreview} />
+            <Image 
+              source={{ uri: image }} 
+              style={styles.imagePreview}
+              resizeMode="cover"
+            />
           )}
 
           <Text style={styles.tagsLabel}>Select Tags:</Text>
@@ -169,7 +181,13 @@ export default function ItemsScreen() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <Card style={styles.card}>
-              {item.image && <Image source={{ uri: item.image }} style={styles.itemImage} />}
+              {item.image && (
+                <Image 
+                  source={{ uri: item.image }} 
+                  style={styles.itemImage}
+                  resizeMode="cover"
+                />
+              )}
               <Card.Content>
                 <View style={styles.itemHeader}>
                   <Text variant="titleLarge" style={styles.cardTitle}>{item.title}</Text>
@@ -180,17 +198,22 @@ export default function ItemsScreen() {
                     onPress={() => toggleSpotlight(item.id)}
                   />
                 </View>
-                <Text variant="bodyMedium" style={styles.cardDescription}>{item.description}</Text>
-                <View style={styles.tagsContainer}>
-                  {item.tags.map(tag => (
-                    <View
-                      key={tag.id}
-                      style={[styles.tag, { backgroundColor: tag.color || '#7E8D85' }]}
-                    >
-                      <Text style={styles.tagText}>{tag.name}</Text>
-                    </View>
-                  ))}
-                </View>
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  {item.description}
+                </Text>
+                {item.tags && item.tags.length > 0 && (
+                  <View style={styles.tagsContainer}>
+                    {item.tags.map(tag => (
+                      <Chip
+                        key={tag.id}
+                        style={[styles.tag, { backgroundColor: tag.color || '#7E8D85' }]}
+                        textStyle={styles.tagText}
+                      >
+                        {tag.name}
+                      </Chip>
+                    ))}
+                  </View>
+                )}
                 {item.customField && (
                   <View style={styles.customFieldContainer}>
                     <Text style={styles.customFieldLabel}>Details:</Text>
@@ -243,54 +266,74 @@ const styles = StyleSheet.create({
   input: { marginBottom: 16, backgroundColor: 'white' },
   imageButton: { marginBottom: 16 },
   imagePreview: {
-    width: '100%', height: 200, borderRadius: 8,
-    marginBottom: 16, backgroundColor: '#eee'
+    width: '100%', 
+    height: 200, 
+    borderRadius: 8,
+    marginBottom: 16, 
+    backgroundColor: '#eee'
   },
   itemImage: {
     width: '100%',
-    height: 150,
+    height: 200,
     borderRadius: 8,
     marginBottom: 8,
-    backgroundColor: '#eee',
   },
-  tagsLabel: { fontWeight: 'bold', marginBottom: 8 },
+  tagsLabel: { fontWeight: 'bold', marginBottom: 8, color: '#3C493F' },
   tagsContainer: {
-    flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16, gap: 8
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    marginBottom: 16, 
+    gap: 8
   },
-  tag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 16 },
+  tag: { borderRadius: 16 },
   selectedTag: { borderWidth: 2, borderColor: '#191f1b' },
-  tagText: { color: 'white' },
+  tagText: { color: 'white', fontSize: 12 },
   formButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
+    gap: 8
   },
-  cancelButton: { flex: 1, marginRight: 8 },
-  submitButton: { flex: 1 },
+  cancelButton: { flex: 1 },
+  submitButton: { flex: 1, backgroundColor: '#7E8D85' },
   card: {
     marginBottom: 16,
     backgroundColor: 'white',
     borderRadius: 12,
-    elevation: 2,
+    overflow: 'hidden',
   },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   cardTitle: { color: '#191f1b', fontWeight: 'bold', flex: 1 },
-  cardDescription: { marginTop: 4, color: '#3C493F' },
+  cardDescription: { color: '#3C493F', marginBottom: 8 },
   customFieldContainer: { marginTop: 8 },
   customFieldLabel: { fontWeight: 'bold', color: '#7E8D85' },
   customFieldText: { color: '#3C493F' },
   list: { paddingBottom: 80 },
-  emptyContainer: { alignItems: 'center', padding: 40 },
-  emptyText: { fontSize: 18, fontWeight: 'bold', color: '#191f1b' },
-  emptySubtext: { fontSize: 14, color: '#7E8D85', marginBottom: 24 },
+  emptyContainer: { 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    flex: 1,
+    padding: 40 
+  },
+  emptyText: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    color: '#191f1b',
+    marginBottom: 8
+  },
+  emptySubtext: { 
+    fontSize: 14, 
+    color: '#7E8D85', 
+    marginBottom: 24 
+  },
   addButton: {
     backgroundColor: '#7E8D85',
     borderRadius: 8,
-    paddingVertical: 6,
   },
   floatingButton: {
     position: 'absolute',
@@ -299,7 +342,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#7E8D85',
     borderRadius: 24,
     paddingHorizontal: 20,
-    paddingVertical: 8,
     elevation: 4,
   },
 });
