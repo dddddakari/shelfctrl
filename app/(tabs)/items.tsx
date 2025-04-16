@@ -76,7 +76,11 @@ export default function ItemsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.header}>My Items</Text>
+      <View style={styles.header}>
+        <Text variant="headlineMedium" style={styles.headerText}>
+          My Items
+        </Text>
+      </View>
 
       <Searchbar
         placeholder="Search items..."

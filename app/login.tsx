@@ -1,26 +1,29 @@
 // app/login.tsx
 import React, { useState } from 'react';
-import { Button, TextInput, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button, TextInput, View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useAppContext } from './context/AppContext';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 const LoginPage = () => {
   const { login } = useAppContext();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleLogin = () => {
     if (!username || !password) {
       setError('Both fields are required');
       return;
     }
-    const success = login(username, password);
-    if (!success) {
-      setError('Invalid credentials');
-      return;
+    
+    const success = login({ username, password });
+    
+    if (success) {
+      router.push('/profile');
+    } else {
+      setError('Invalid username or password');
     }
-    setError('');
   };
 
   return (
