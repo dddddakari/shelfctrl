@@ -60,6 +60,11 @@ type AppContextType = {
   addItemToCollection: (collectionId: string, item: Item) => void;
   logout: () => void;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+
+  addTag: (tag: Omit<Tag, 'id'>) => void;
+  removeTag: (tagId: string) => void;
+
+  updateItemTags: (itemId: string, tagUpdates: Tag[]) => void;
 };
 
 const AppContext = createContext<AppContextType>({} as AppContextType);
@@ -230,6 +235,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCollections([]);
     setTags([]);
   };
+  const addTag = (tag: Omit<Tag, 'id'>) => {
+    const newTag = { ...tag, id: Date.now().toString() };
+    setTags(prev => [...prev, newTag]);
+    return newTag;
+  };
+  
+  const removeTag = (tagId: string) => {
+    setTags(prev => prev.filter(tag => tag.id !== tagId));
+
+    setCollections(prev => 
+      prev.map(collection => ({
+        ...collection,
+        items: collection.items.map(item => ({
+          ...item,
+          tags: item.tags.filter(tag => tag.id !== tagId)
+        })),
+        tags: collection.tags.filter(tag => tag.id !== tagId)
+      }))
+    );
+  };
+  
+  const updateItemTags = (itemId: string, tagUpdates: Tag[]) => {
+    setCollections(prev =>
+      prev.map(collection => ({
+        ...collection,
+        items: collection.items.map(item =>
+          item.id === itemId ? { ...item, tags: tagUpdates } : item
+        )
+      }))
+    );
+  };
 
   const allItems = collections.flatMap(c => c.items);
 
@@ -240,6 +276,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         collections,
         items: allItems,
         tags,
+        addTag,
+        removeTag,
+        updateItemTags,
         isLoggedIn,
         updateProfile,
         addCollection,
