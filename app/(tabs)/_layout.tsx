@@ -36,6 +36,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="person" size={24} color={color} />
           ),
@@ -46,10 +47,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="collections/index"
         options={{
-          title: 'Collections',
+          title: 'MY COLLECTIONS',
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="collections" size={24} color={color} />
           ),
+          headerStyle: {
+            backgroundColor: '#191f1b',
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 32.5,
+            color: 'white', // Title color
+          },
+           headerTitleAlign: 'left'
         }}
       />
 
@@ -85,10 +95,19 @@ export default function TabLayout() {
             <Tabs.Screen
         name="items"
         options={{
-          title: 'Items',
+          title: 'MY ITEMS',
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="list" size={24} color={color} />
           ),
+          headerStyle: {
+            backgroundColor: '#191f1b',
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 32.5,
+            color: 'white', // Title color
+          },
+           headerTitleAlign: 'left'
         }}
       />
 
@@ -96,10 +115,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: 'SETTINGS',
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="settings" size={24} color={color} />
           ),
+          headerStyle: {
+            backgroundColor: '#191f1b',
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 32.5,
+            color: 'white', // Title color
+          },
+          headerTitleAlign: 'left',
         }}
       />
     </Tabs>
