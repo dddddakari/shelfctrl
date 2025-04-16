@@ -32,6 +32,7 @@ const LoginPage = () => {
         secureTextEntry
       />
       <Button title="Login" onPress={handleLogin} />
+      
       <TouchableOpacity style={styles.signUpLink}>
         <Text>Don't have an account? <Link style={styles.linkText} href={'/signup'}>Sign Up</Link></Text>
       </TouchableOpacity>
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#007BFF',
+    color: '#7E8D85',
     fontWeight: 'bold',
   },
 });

@@ -37,7 +37,10 @@ export default function ProfileScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.spotlightItem}>
-              <Text style={styles.spotlightItemTitle}>{item.title || item.name}</Text>
+                <Link href={`../items/${item.id}`}>
+                <Image source={{ uri: item.image }} style={{ width: 200, height: 200, borderRadius: 20 }} />
+                </Link>
+
             </View>
           )}
           contentContainerStyle={styles.spotlightList}
